@@ -67,6 +67,7 @@ import net.evendanan.pixel.GeneralDialogController;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -91,6 +92,11 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
     private boolean mAutoCap;
 
     private int mOrientation = Configuration.ORIENTATION_PORTRAIT;
+
+    //dc-- data collection fields
+    private Date startPoint;
+    private Date endPoint;
+    int count = 0;
 
     public AnySoftKeyboard() {
         super();
@@ -315,7 +321,7 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
     }
 
     private void onFunctionKey(final int primaryCode, final Key key, final int multiTapIndex, final int[] nearByKeyCodes, final boolean fromUI) {
-        if (BuildConfig.DEBUG) Logger.d(TAG, "onFunctionKey %d", primaryCode);
+        if (BuildConfig.DEBUG) Logger.d(TAG, "onFunctionKey1 %d", primaryCode);
 
         final InputConnection ic = getCurrentInputConnection();
 
@@ -330,6 +336,10 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
                         handleDeleteLastCharacter(false);
                     }
                 }
+                if (BuildConfig.DEBUG) Logger.d(TAG, "dc-- keystroke type = sep[delete]", primaryCode);
+                if (count > 0){
+                    count--;
+                }
                 break;
             case KeyCodes.SHIFT:
                 if (fromUI) {
@@ -339,6 +349,7 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
                     onPress(primaryCode);
                     onRelease(primaryCode);
                 }
+                if (BuildConfig.DEBUG) Logger.d(TAG, "dc-- keystroke type = other", primaryCode);
                 break;
             case KeyCodes.SHIFT_LOCK:
                 mShiftKeyState.toggleLocked();
@@ -537,7 +548,7 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
     }
 
     private void onNonFunctionKey(final int primaryCode, final Key key, final int multiTapIndex, final int[] nearByKeyCodes, final boolean fromUI) {
-        if (BuildConfig.DEBUG) Logger.d(TAG, "onFunctionKey %d", primaryCode);
+        if (BuildConfig.DEBUG) Logger.d(TAG, "onFunctionKey2 %d", primaryCode);
 
         final InputConnection ic = getCurrentInputConnection();
 
@@ -567,6 +578,8 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
                 } else {
                     handleSeparator(primaryCode);
                 }
+                if (BuildConfig.DEBUG) Logger.d(TAG, "dc-- keystroke type = sep[space]", primaryCode);
+
                 break;
             case KeyCodes.SPACE:
                 //shortcut. Nothing more.
@@ -578,6 +591,19 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
                         getKeyboardSwitcher().nextKeyboard(getCurrentInputEditorInfo(), NextKeyboardType.Alphabet);
                     }
                 }
+
+                if(endPoint == null && startPoint != null){
+                    endPoint = new Date();
+                    if (BuildConfig.DEBUG) Logger.d(TAG, "dc-- word start endpoint=%s", startPoint.toString());
+                    if (BuildConfig.DEBUG) Logger.d(TAG, "dc-- word endpoint=%s", endPoint.toString());
+                    if (BuildConfig.DEBUG) Logger.d(TAG, "dc-- word count=%d", count);
+
+                    endPoint = null;
+                    startPoint = null;
+                    count = 0;
+                }
+
+
                 break;
             case KeyCodes.TAB:
                 sendTab();
@@ -602,6 +628,13 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
                         handleCharacter(primaryCode, key, multiTapIndex, nearByKeyCodes);
                     }
                     mAdditionalCharacterForReverting = false;
+
+                    if(startPoint == null){
+                        startPoint = new Date();
+                        if (BuildConfig.DEBUG) Logger.d(TAG, "dc-- word start point init");
+                    }
+                    count++;
+
                 }
                 break;
         }
