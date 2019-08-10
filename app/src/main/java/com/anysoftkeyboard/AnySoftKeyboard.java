@@ -39,6 +39,8 @@ import android.widget.Toast;
 
 import com.anysoftkeyboard.api.KeyCodes;
 import com.anysoftkeyboard.base.utils.Logger;
+import com.anysoftkeyboard.datacollection.DataCollection;
+import com.anysoftkeyboard.datacollection.Word;
 import com.anysoftkeyboard.dictionaries.DictionaryAddOnAndBuilder;
 import com.anysoftkeyboard.dictionaries.ExternalDictionaryFactory;
 import com.anysoftkeyboard.dictionaries.TextEntryState;
@@ -93,10 +95,12 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
 
     private int mOrientation = Configuration.ORIENTATION_PORTRAIT;
 
-    //dc-- data collection fields
-    private Date startPoint;
-    private Date endPoint;
-    int count = 0;
+    //dc-- data collection fields test
+    private DataCollection dataCollection = new DataCollection();
+    private Word word = null;
+//    private Date startPoint;
+//    private Date endPoint;
+//    int count = 0;
 
     public AnySoftKeyboard() {
         super();
@@ -244,6 +248,8 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
     @Override
     public void onFinishInput() {
         super.onFinishInput();
+        // check the word is finish or not when input is finish
+        completeWord();
 
         final IBinder imeToken = getImeToken();
         if (mShowKeyboardIconInStatusBar && imeToken != null) {
@@ -252,6 +258,8 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
 
         final InputViewBinder inputView = getInputView();
         if (inputView != null) inputView.resetInputView();
+
+
     }
 
     @Override
@@ -336,10 +344,11 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
                         handleDeleteLastCharacter(false);
                     }
                 }
-                if (BuildConfig.DEBUG) Logger.d(TAG, "dc-- keystroke type = sep[delete]", primaryCode);
-                if (count > 0){
-                    count--;
-                }
+                if (BuildConfig.DEBUG)
+                    Logger.d(TAG, "dc-- keystroke type = sep[delete]", primaryCode);
+                //dc-- Word delete character for word when user click back space key
+                word.deleteCharacter();
+
                 break;
             case KeyCodes.SHIFT:
                 if (fromUI) {
@@ -578,7 +587,8 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
                 } else {
                     handleSeparator(primaryCode);
                 }
-                if (BuildConfig.DEBUG) Logger.d(TAG, "dc-- keystroke type = sep[space]", primaryCode);
+                if (BuildConfig.DEBUG)
+                    Logger.d(TAG, "dc-- keystroke type = sep[space]", primaryCode);
 
                 break;
             case KeyCodes.SPACE:
@@ -591,18 +601,8 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
                         getKeyboardSwitcher().nextKeyboard(getCurrentInputEditorInfo(), NextKeyboardType.Alphabet);
                     }
                 }
-
-                if(endPoint == null && startPoint != null){
-                    endPoint = new Date();
-                    if (BuildConfig.DEBUG) Logger.d(TAG, "dc-- word start endpoint=%s", startPoint.toString());
-                    if (BuildConfig.DEBUG) Logger.d(TAG, "dc-- word endpoint=%s", endPoint.toString());
-                    if (BuildConfig.DEBUG) Logger.d(TAG, "dc-- word count=%d", count);
-
-                    endPoint = null;
-                    startPoint = null;
-                    count = 0;
-                }
-
+                //dc-- Word complete word object
+                completeWord();
 
                 break;
             case KeyCodes.TAB:
@@ -629,14 +629,44 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
                     }
                     mAdditionalCharacterForReverting = false;
 
-                    if(startPoint == null){
-                        startPoint = new Date();
-                        if (BuildConfig.DEBUG) Logger.d(TAG, "dc-- word start point init");
-                    }
-                    count++;
+                    //dc-- Word if user click alphabetic key, then start a new Word section
+                    //check if the object has been created
+                    initWord();
+
 
                 }
                 break;
+        }
+    }
+
+    private void initWord() {
+        if (word == null)
+            word = new Word();
+
+        if (word.getStartTime() == 0) {
+            word.setStartTime(new Date().getTime());
+            if (BuildConfig.DEBUG) Logger.d(TAG, "dc-- word start point init");
+        }
+
+        word.addCharacter();
+    }
+
+    private void completeWord() {
+        // dc-- Word when click space, check the word start point and end point if there is start point and no end point, then it is a word
+        if (word != null && word.isInitAndNotComplelte()) {
+            word.setEndTime(new Date().getTime());
+            if (word.getCharacters() > 0)
+                dataCollection.addWord(word);
+
+
+            if (BuildConfig.DEBUG) {
+                Logger.d(TAG, "dc-- word start time=%d", word.getStartTime());
+                Logger.d(TAG, "dc-- word end time=%d", word.getEndTime());
+                Logger.d(TAG, "dc-- word count=%d", word.getCharacters());
+                Logger.d(TAG, "dc-- data collection words=%s", dataCollection.getWords());
+            }
+
+            word = new Word();
         }
     }
 
