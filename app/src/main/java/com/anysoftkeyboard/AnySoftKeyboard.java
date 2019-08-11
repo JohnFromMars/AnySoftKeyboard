@@ -98,9 +98,8 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
     //dc-- data collection fields test
     private DataCollection dataCollection = new DataCollection();
     private Word word = null;
-//    private Date startPoint;
-//    private Date endPoint;
-//    int count = 0;
+    private float x = 0;
+    private float y = 0;
 
     public AnySoftKeyboard() {
         super();
@@ -287,6 +286,7 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
 
     private void setKeyboardStatusIcon() {
         AnyKeyboard alphabetKeyboard = getCurrentAlphabetKeyboard();
+
         final IBinder imeToken = getImeToken();
         if (mShowKeyboardIconInStatusBar && alphabetKeyboard != null && imeToken != null) {
             mInputMethodManager.showStatusIcon(imeToken,
@@ -330,6 +330,7 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
 
     private void onFunctionKey(final int primaryCode, final Key key, final int multiTapIndex, final int[] nearByKeyCodes, final boolean fromUI) {
         if (BuildConfig.DEBUG) Logger.d(TAG, "onFunctionKey1 %d", primaryCode);
+
 
         final InputConnection ic = getCurrentInputConnection();
 
@@ -673,6 +674,7 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
     @Override
     public void onKey(int primaryCode, Key key, int multiTapIndex, int[] nearByKeyCodes, boolean fromUI) {
         super.onKey(primaryCode, key, multiTapIndex, nearByKeyCodes, fromUI);
+        Logger.d(TAG, "dc-- Keystroke distance=%d", key.squareDistanceFormCenter((int) x, (int) y));
 
         if (primaryCode > 0) {
             onNonFunctionKey(primaryCode, key, multiTapIndex, nearByKeyCodes, fromUI);
@@ -1063,8 +1065,18 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
 
     @Override
     public void onPress(int primaryCode) {
+
         super.onPress(primaryCode);
         InputConnection ic = getCurrentInputConnection();
+
+
+        InputViewBinder inputViewBinder = getInputView();
+        final AnyKeyboardView anyKeyboardView = (AnyKeyboardView) inputViewBinder;
+
+        //dc-- Keystroke function
+        Logger.d(TAG, "dc-- Keystroke onPress x=%f, y=%f, pressure=%f", anyKeyboardView.getMotionEvent().getX(), anyKeyboardView.getMotionEvent().getY(), anyKeyboardView.getMotionEvent().getPressure());
+        x = anyKeyboardView.getMotionEvent().getX();
+        y = anyKeyboardView.getMotionEvent().getY();
 
         if (primaryCode == KeyCodes.SHIFT) {
             mShiftKeyState.onPress();
@@ -1086,6 +1098,7 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
 
     @Override
     public void onRelease(int primaryCode) {
+        Logger.d(TAG, "dc-- Keystroke onRelease");
         super.onRelease(primaryCode);
         InputConnection ic = getCurrentInputConnection();
         if (primaryCode == KeyCodes.SHIFT) {
