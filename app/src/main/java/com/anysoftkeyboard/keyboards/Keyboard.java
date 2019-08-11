@@ -626,6 +626,20 @@ public abstract class Keyboard {
         }
 
         /**
+         * Return the square distance between the given coordinate and the center of the key.
+         *
+         * @param x The given x
+         * @param y The given y
+         * @return The square distance between the given coordinate and the center of the key
+         */
+        public int squareDistanceFormCenter(int x, int y) {
+            //Logger.d(TAG, "dc-- Keystroke onPress x=%d, y=%d, center x=%d, center y=%d", x, y, centerX, centerY);
+            int xDist = this.centerX - x;
+            int yDist = this.centerY - y;
+            return xDist * xDist + yDist * yDist;
+        }
+
+        /**
          * Returns the drawable state for the key, based on the current state
          * and type of the key.
          *
