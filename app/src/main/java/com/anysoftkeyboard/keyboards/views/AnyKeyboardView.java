@@ -85,6 +85,9 @@ public class AnyKeyboardView extends AnyKeyboardViewWithExtraDraw implements Inp
     //private int mWatermarkEdgeY = 0;
     private final List<Drawable> mWatermarks = new ArrayList<>();
 
+    //dc-- data collection field
+    protected MotionEvent motionEvent = null;
+
     public AnyKeyboardView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
@@ -180,6 +183,10 @@ public class AnyKeyboardView extends AnyKeyboardViewWithExtraDraw implements Inp
         return theme.getIconsThemeResId();
     }
 
+    public MotionEvent getMotionEvent() {
+        return motionEvent;
+    }
+
     @Override
     protected final boolean isFirstDownEventInsideSpaceBar() {
         return mIsFirstDownEventInsideSpaceBar;
@@ -189,6 +196,10 @@ public class AnyKeyboardView extends AnyKeyboardViewWithExtraDraw implements Inp
 
     @Override
     public boolean onTouchEvent(@NonNull MotionEvent me) {
+
+        this.motionEvent = me;
+
+
         if (getKeyboard() == null) {
             //I mean, if there isn't any keyboard I'm handling, what's the point?
             return false;
@@ -282,7 +293,7 @@ public class AnyKeyboardView extends AnyKeyboardViewWithExtraDraw implements Inp
 
     @Override
     protected void onUpEvent(PointerTracker tracker, int x, int y,
-            long eventTime) {
+                             long eventTime) {
         super.onUpEvent(tracker, x, y, eventTime);
         mIsFirstDownEventInsideSpaceBar = false;
     }
