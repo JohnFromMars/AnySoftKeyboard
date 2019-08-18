@@ -1,6 +1,5 @@
 package com.anysoftkeyboard.datacollection;
 
-import com.anysoftkeyboard.api.KeyCodes;
 
 public class Keystroke {
     public static final String OTHER = "other";
@@ -77,11 +76,11 @@ public class Keystroke {
     public void setType(int primaryCode) {
 
         //sep includes space, comma, period
-        if (primaryCode == KeyCodes.SPACE || primaryCode == KeyCodes.ENTER) {
+        if (ExtendedKeyCodes.isSeperator(primaryCode)) {
             this.type = Keystroke.SEP;
 
             //err include delete forward delete and delete word
-        } else if (primaryCode == KeyCodes.DELETE || primaryCode == KeyCodes.DELETE_WORD || primaryCode == KeyCodes.FORWARD_DELETE) {
+        } else if (ExtendedKeyCodes.isError(primaryCode)) {
             this.type = Keystroke.ERR;
 
             //number
