@@ -40,6 +40,7 @@ import android.widget.Toast;
 import com.anysoftkeyboard.api.KeyCodes;
 import com.anysoftkeyboard.base.utils.Logger;
 import com.anysoftkeyboard.datacollection.DataCollection;
+import com.anysoftkeyboard.datacollection.ExtendedKeyCodes;
 import com.anysoftkeyboard.datacollection.Keystroke;
 import com.anysoftkeyboard.datacollection.Word;
 import com.anysoftkeyboard.dictionaries.DictionaryAddOnAndBuilder;
@@ -351,7 +352,7 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
                 if (BuildConfig.DEBUG)
                     Logger.d(TAG, "dc-- keystroke type = sep[delete]", primaryCode);
                 //dc-- Word delete character for word when user click back space key
-                word.deleteCharacter();
+//                word.deleteCharacter();
                 //dc-- Keystroke set type as err
 
 
@@ -593,10 +594,9 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
                 } else {
                     handleSeparator(primaryCode);
                 }
-                if (BuildConfig.DEBUG)
-                    Logger.d(TAG, "dc-- keystroke type = sep[space]", primaryCode);
 
                 break;
+
             case KeyCodes.SPACE:
                 //shortcut. Nothing more.
                 handleSeparator(primaryCode);
@@ -608,7 +608,7 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
                     }
                 }
                 //dc-- Word complete word object
-                completeWord();
+//                completeWord();
 
                 break;
             case KeyCodes.TAB:
@@ -637,11 +637,30 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
 
                     //dc-- Word if user click alphabetic key, then start a new Word section
                     //check if the object has been created
-                    initWord();
+//                    initWord();
 
 
                 }
                 break;
+        }
+    }
+
+    private void wordAction(int primaryCode) {
+        // if primary code is alphabetic type, initial the Word object
+        if (ExtendedKeyCodes.isAlphabetic(primaryCode)) {
+            initWord();
+
+            //if  the primary code is punctuation or seperator type, then complete the word object
+        } else if (ExtendedKeyCodes.isPunctuation(primaryCode) || ExtendedKeyCodes.isSeperator(primaryCode)) {
+            completeWord();
+
+            //if the primary code is error type, subtract the number of character by one
+        } else if (ExtendedKeyCodes.isError(primaryCode)) {
+
+            if (primaryCode == ExtendedKeyCodes.DELETE_WORD)
+                word.setCharacters(0);
+            else
+                word.deleteCharacter();
         }
     }
 
@@ -682,6 +701,7 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
 //        Logger.d(TAG, "dc-- Keystroke distance=%d", key.squareDistanceFormCenter((int) x, (int) y));
 //        Logger.d(TAG, "dc-- Keystroke distance=%d", key.squareDistanceFormCenter((int) dataCollection.getLastKeystroke().getX(), (int) dataCollection.getLastKeystroke().getY()));
         Logger.d(TAG, "dc-- Keystroke primaryCode=%d", primaryCode);
+        wordAction(primaryCode);
 
         float distance = (float) sqrt(key.squareDistanceFormCenter((int) dataCollection.getLastKeystroke().getX(), (int) dataCollection.getLastKeystroke().getY()));
         dataCollection.getLastKeystroke().setDistance(distance);
