@@ -40,6 +40,7 @@ import android.widget.Toast;
 import com.anysoftkeyboard.api.KeyCodes;
 import com.anysoftkeyboard.base.utils.Logger;
 import com.anysoftkeyboard.datacollection.DataCollection;
+import com.anysoftkeyboard.datacollection.Keystroke;
 import com.anysoftkeyboard.datacollection.Word;
 import com.anysoftkeyboard.dictionaries.DictionaryAddOnAndBuilder;
 import com.anysoftkeyboard.dictionaries.ExternalDictionaryFactory;
@@ -71,6 +72,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+
+import static java.lang.Math.sqrt;
 
 /**
  * Input method implementation for QWERTY-ish keyboard.
@@ -349,6 +352,8 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
                     Logger.d(TAG, "dc-- keystroke type = sep[delete]", primaryCode);
                 //dc-- Word delete character for word when user click back space key
                 word.deleteCharacter();
+                //dc-- Keystroke set type as err
+
 
                 break;
             case KeyCodes.SHIFT:
@@ -674,7 +679,13 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
     @Override
     public void onKey(int primaryCode, Key key, int multiTapIndex, int[] nearByKeyCodes, boolean fromUI) {
         super.onKey(primaryCode, key, multiTapIndex, nearByKeyCodes, fromUI);
-        Logger.d(TAG, "dc-- Keystroke distance=%d", key.squareDistanceFormCenter((int) x, (int) y));
+//        Logger.d(TAG, "dc-- Keystroke distance=%d", key.squareDistanceFormCenter((int) x, (int) y));
+//        Logger.d(TAG, "dc-- Keystroke distance=%d", key.squareDistanceFormCenter((int) dataCollection.getLastKeystroke().getX(), (int) dataCollection.getLastKeystroke().getY()));
+        Logger.d(TAG, "dc-- Keystroke primaryCode=%d", primaryCode);
+
+        float distance = (float) sqrt(key.squareDistanceFormCenter((int) dataCollection.getLastKeystroke().getX(), (int) dataCollection.getLastKeystroke().getY()));
+        dataCollection.getLastKeystroke().setDistance(distance);
+        dataCollection.getLastKeystroke().setType(primaryCode);
 
         if (primaryCode > 0) {
             onNonFunctionKey(primaryCode, key, multiTapIndex, nearByKeyCodes, fromUI);
@@ -1074,7 +1085,10 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
         final AnyKeyboardView anyKeyboardView = (AnyKeyboardView) inputViewBinder;
 
         //dc-- Keystroke function
-        Logger.d(TAG, "dc-- Keystroke onPress x=%f, y=%f, pressure=%f", anyKeyboardView.getMotionEvent().getX(), anyKeyboardView.getMotionEvent().getY(), anyKeyboardView.getMotionEvent().getPressure());
+        keystrokeOnPress(anyKeyboardView);
+
+
+        // Logger.d(TAG, "dc-- Keystroke onPress x=%f, y=%f, pressure=%f", anyKeyboardView.getMotionEvent().getX(), anyKeyboardView.getMotionEvent().getY(), anyKeyboardView.getMotionEvent().getPressure());
         x = anyKeyboardView.getMotionEvent().getX();
         y = anyKeyboardView.getMotionEvent().getY();
 
@@ -1096,11 +1110,28 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
         }
     }
 
+    private void keystrokeOnPress(AnyKeyboardView anyKeyboardView) {
+        //new a keystroke object and set the parameters
+        Keystroke keystroke = new Keystroke();
+        keystroke.setStartTime(new Date().getTime());
+        keystroke.setPressure(anyKeyboardView.getMotionEvent().getPressure());
+        keystroke.setX(anyKeyboardView.getMotionEvent().getX());
+        keystroke.setY(anyKeyboardView.getMotionEvent().getY());
+
+        //add this keystroke to data collection
+        dataCollection.addKeystroke(keystroke);
+        Logger.d(TAG, "dc-- Keystroke object x=%f, y=%f, pressure=%f", keystroke.getX(), keystroke.getY(), keystroke.getPressure());
+    }
+
     @Override
     public void onRelease(int primaryCode) {
         Logger.d(TAG, "dc-- Keystroke onRelease");
         super.onRelease(primaryCode);
         InputConnection ic = getCurrentInputConnection();
+
+        //dc-- Keystroke function
+        keystrokeOnRelease();
+
         if (primaryCode == KeyCodes.SHIFT) {
             mShiftKeyState.onRelease(mMultiTapTimeout, mLongPressTimeout);
             handleShift();
@@ -1117,6 +1148,19 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
         } else {
             mControlKeyState.onOtherKeyReleased();
         }
+    }
+
+    private void keystrokeOnRelease() {
+        //get last keystroke from data collection and set ent time
+        Keystroke keystroke = dataCollection.getLastKeystroke();
+
+        if (keystroke != null) {
+            keystroke.setEndTime(new Date().getTime());
+        }
+
+        Logger.d(TAG, "dc-- Keystroke object=%s", dataCollection.getLastKeystroke());
+        Logger.d(TAG, "dc-- Keystroke object=%s", dataCollection.getKeystrokes());
+
     }
 
     private void launchSettings() {
