@@ -57,4 +57,24 @@ public class ExtendedKeyCodes extends KeyCodes {
 
         return result;
     }
+
+    /**
+     * This method checks f the primary code is a seperator, which includes space, enter
+     *
+     * @param primaryCode primary key code
+     * @return true or false
+     */
+    public static boolean isSeperator(int primaryCode) {
+        return primaryCode == KeyCodes.SPACE || primaryCode == KeyCodes.ENTER;
+    }
+
+    /**
+     * This method checks if the primary code is an error, which includes delete, delete word and forward delete
+     *
+     * @param primaryCode primary key code
+     * @return true or false
+     */
+    public static boolean isError(int primaryCode) {
+        return primaryCode == KeyCodes.DELETE || primaryCode == KeyCodes.DELETE_WORD || primaryCode == KeyCodes.FORWARD_DELETE;
+    }
 }
