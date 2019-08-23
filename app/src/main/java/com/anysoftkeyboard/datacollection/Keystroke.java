@@ -13,7 +13,7 @@ public class Keystroke {
     private float pressure;
     private float x;
     private float y;
-    private float distance;
+    private int distance;
     private long startTime;
     private long endTime;
     private String type = Keystroke.OTHER;
@@ -49,7 +49,7 @@ public class Keystroke {
         return distance;
     }
 
-    public void setDistance(float distance) {
+    public void setDistance(int distance) {
         this.distance = distance;
     }
 
