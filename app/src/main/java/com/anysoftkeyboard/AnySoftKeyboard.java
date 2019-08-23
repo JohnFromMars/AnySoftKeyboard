@@ -41,7 +41,7 @@ import android.widget.Toast;
 import com.anysoftkeyboard.api.KeyCodes;
 import com.anysoftkeyboard.base.utils.Logger;
 import com.anysoftkeyboard.datacollection.DataCollection;
-import com.anysoftkeyboard.datacollection.DataTransmitter;
+//import com.anysoftkeyboard.datacollection.DataTransmitter;
 import com.anysoftkeyboard.datacollection.ExtendedKeyCodes;
 import com.anysoftkeyboard.datacollection.Keystroke;
 import com.anysoftkeyboard.datacollection.Word;
@@ -269,13 +269,13 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
         if (inputView != null) inputView.resetInputView();
 
         //dc-- DataTransmitter test write file
-        if (dataCollection != null) {
-            DataTransmitter transmitter = new DataTransmitter(getApplicationContext(), dataCollection);
-
-            Thread thread = new Thread(transmitter);
-            thread.start();
-
-        }
+//        if (dataCollection != null) {
+//            DataTransmitter transmitter = new DataTransmitter(getApplicationContext(), dataCollection);
+//
+//            Thread thread = new Thread(transmitter);
+//            thread.start();
+//
+//        }
 
         dataCollection = null;
     }
