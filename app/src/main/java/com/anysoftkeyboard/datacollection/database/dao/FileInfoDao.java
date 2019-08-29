@@ -80,8 +80,12 @@ public class FileInfoDao {
             fileInfo.setId(result.getInt(result.getColumnIndex(FileInfo.FILE_INFO_ID)));
             fileInfo.setHasSent(result.getInt(result.getColumnIndex(FileInfo.FILE_INFO_HAS_SENT)) > 0);
             fileInfo.setSize(result.getInt(result.getColumnIndex(FileInfo.FILE_INFO_SIZE)));
+        }
+
+        if(result != null){
             result.close();
         }
+
         Logger.d("test", "dc-- DataTransmitter getFile finish");
         return fileInfo;
     }
