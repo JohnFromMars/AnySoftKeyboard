@@ -5,9 +5,9 @@ import android.os.Build;
 import android.support.annotation.RequiresApi;
 
 public class BatteryInfo {
-    boolean isCharging;
-    int batteryLevel;
-    int batteryStatus;
+   private boolean isCharging;
+   private int batteryLevel;
+   private int batteryStatus;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     public BatteryInfo( BatteryManager batteryManager) {
