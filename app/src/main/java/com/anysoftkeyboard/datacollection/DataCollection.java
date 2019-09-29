@@ -13,6 +13,7 @@ public class DataCollection {
     private String deviceId;
     private String startPoint;
     private String endPoint;
+    private BatteryInfo batteryInfo;
     private ArrayList<Word> words;
     private ArrayList<Keystroke> keystrokes;
 
@@ -37,6 +38,14 @@ public class DataCollection {
 
     public ArrayList<Word> getWords() {
         return words;
+    }
+
+    public BatteryInfo getBatteryInfo() {
+        return batteryInfo;
+    }
+
+    public void setBatteryInfo(BatteryInfo batteryInfo) {
+        this.batteryInfo = batteryInfo;
     }
 
     public void setWords(ArrayList<Word> words) {
