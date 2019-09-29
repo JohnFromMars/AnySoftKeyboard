@@ -11,6 +11,7 @@
         tools:ignore="UnusedAttribute" />
     <!-- http://d.android.com/guide/practices/screens_support.html read about legacy. -->
 
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <!-- required for the user dictionary (long press a word in the suggestions bar) -->
     <uses-permission android:name="android.permission.READ_USER_DICTIONARY" />
