@@ -1,6 +1,9 @@
 package com.anysoftkeyboard.datacollection;
 
 
+
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
 
 /**
@@ -12,6 +15,7 @@ public class DataCollection {
     private String endPoint;
     private ArrayList<Word> words;
     private ArrayList<Keystroke> keystrokes;
+
 
 
     public DataCollection() {
@@ -45,5 +49,10 @@ public class DataCollection {
 
     public void setKeystrokes(ArrayList<Keystroke> keystrokes) {
         this.keystrokes = keystrokes;
+    }
+
+    public String toJsonString(){
+        Gson gson = new Gson();
+        return gson.toJson(this);
     }
 }
