@@ -40,7 +40,7 @@ public class DataTransmitter implements Runnable {
 
         File file = new File(this.context.getFilesDir(), fileInfo.getFileName());
         BufferedWriter writer = Files.newBufferedWriter(file.toPath(), UTF8);
-        writer.write(this.dataCollection.getKeystrokes().toString() + this.dataCollection.getWords().toString());
+        writer.write(this.dataCollection.toJsonString());
         writer.close();
 
         //Test reading
