@@ -1,22 +1,25 @@
 package com.anysoftkeyboard.datacollection;
 
 
-
 import com.google.gson.Gson;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 /**
- *
+ * yyyy-mm-dd HH:mm:ss
  */
 public class DataCollection {
+    private static final String DATE_FORM = "yyyy-mm-dd HH:mm:ss z";
+
     private String deviceId;
     private String startPoint;
     private String endPoint;
     private BatteryInfo batteryInfo;
     private ArrayList<Word> words;
     private ArrayList<Keystroke> keystrokes;
-
 
 
     public DataCollection() {
@@ -36,16 +39,18 @@ public class DataCollection {
         return startPoint;
     }
 
-    public void setStartPoint(String startPoint) {
-        this.startPoint = startPoint;
+    public void setStartPoint() {
+        SimpleDateFormat sm = new SimpleDateFormat(DATE_FORM, Locale.getDefault());
+        this.startPoint = sm.format(new Date());
     }
 
     public String getEndPoint() {
         return endPoint;
     }
 
-    public void setEndPoint(String endPoint) {
-        this.endPoint = endPoint;
+    public void setEndPoint() {
+        SimpleDateFormat sm = new SimpleDateFormat(DATE_FORM, Locale.getDefault());
+        this.endPoint = sm.format(new Date());
     }
 
     public void addWord(Word word) {
@@ -84,7 +89,7 @@ public class DataCollection {
         this.keystrokes = keystrokes;
     }
 
-    public String toJsonString(){
+    public String toJsonString() {
         Gson gson = new Gson();
         return gson.toJson(this);
     }
