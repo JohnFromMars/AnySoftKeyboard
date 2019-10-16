@@ -14,6 +14,8 @@ public class BatteryInfo {
     private int batterLevel;
     private int batteryStatus;
 
+    public BatteryInfo(){ }
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     public BatteryInfo(BatteryManager batteryManager) {
         this.isCharging = batteryManager.isCharging();
