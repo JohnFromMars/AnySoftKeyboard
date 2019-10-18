@@ -2,6 +2,7 @@ package com.anysoftkeyboard.datacollection;
 
 
 import android.content.Context;
+import android.net.TrafficStats;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
@@ -72,6 +73,7 @@ public class DataTransmitter implements Runnable {
     @Override
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void run() {
+        TrafficStats.setThreadStatsTag((int) Thread.currentThread().getId());
 //        transmitProcess();
         experimentProcess();
     }
