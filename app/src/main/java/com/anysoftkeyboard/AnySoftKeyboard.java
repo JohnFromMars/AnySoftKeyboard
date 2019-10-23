@@ -19,6 +19,7 @@ package com.anysoftkeyboard;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.hardware.SensorManager;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.IBinder;
@@ -47,6 +48,7 @@ import com.anysoftkeyboard.datacollection.DataCollection;
 import com.anysoftkeyboard.datacollection.DataTransmitter;
 import com.anysoftkeyboard.datacollection.ExtendedKeyCodes;
 import com.anysoftkeyboard.datacollection.Keystroke;
+import com.anysoftkeyboard.datacollection.SensorListener;
 import com.anysoftkeyboard.datacollection.Word;
 import com.anysoftkeyboard.dictionaries.DictionaryAddOnAndBuilder;
 import com.anysoftkeyboard.dictionaries.ExternalDictionaryFactory;
@@ -74,19 +76,16 @@ import com.menny.android.anysoftkeyboard.R;
 
 import net.evendanan.pixel.GeneralDialogController;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import static java.lang.Math.sqrt;
 
 /**
  * Input method implementation for QWERTY-ish keyboard.
  */
 public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
-
     private static final ExtractedTextRequest EXTRACTED_TEXT_REQUEST = new ExtractedTextRequest();
 
     private final PackagesChangedReceiver mPackagesChangedReceiver = new PackagesChangedReceiver(this);
@@ -101,6 +100,7 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
     private View mFullScreenExtractView;
     private EditText mFullScreenExtractTextView;
 
+
     private boolean mAutoCap;
 
     private int mOrientation = Configuration.ORIENTATION_PORTRAIT;
@@ -108,6 +108,9 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
     //dc-- data collection fields test
     private DataCollection dataCollection = null;
     private Word word = null;
+    private SensorListener sensorListner;
+    //    private SensorManager sensorManager;
+//    private Sensor accSensor;
     private float x = 0;
     private float y = 0;
 
@@ -242,14 +245,22 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
 
         super.onStartInputView(attribute, restarting);
 
+        //dc-- DataCollection Sensor
+//        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+////        accSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+////        sensorManager.registerListener(this, accSensor,SensorManager.SENSOR_DELAY_NORMAL);
+//        sensorListner.start();
+
+
+
         //dc-- DataCollection init data collection
         dataCollection = new DataCollection();
-        TelephonyManager tm = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+        TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
 
         //dc-- DataCollection set the device ID of data collection if permitted
-        try{
+        try {
             dataCollection.setDeviceId(tm.getImei());
-        }catch (SecurityException ex){
+        } catch (SecurityException ex) {
             dataCollection.setDeviceId("No Permission");
         }
         dataCollection.setStartPoint();
@@ -286,6 +297,14 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
         if (inputView != null) inputView.resetInputView();
 
         //dc-- DataTransmitter
+        Logger.v(TAG, "dc-- DataCollection sensor manager - before");
+//        sensorManager.unregisterListener(this);
+
+        if (sensorListner != null) {
+            sensorListner.stop();
+            sensorListner = null;
+        }
+        Logger.v(TAG, "dc-- DataCollection sensor manager - after");
         if (dataCollection != null && dataCollection.getKeystrokes().size() > 0) {
             //set battery info and end point for DataCollection object
             BatteryInfo batteryInfo = new BatteryInfo((BatteryManager) getSystemService(Context.BATTERY_SERVICE));
@@ -741,6 +760,12 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
 //        Logger.d(TAG, "dc-- Keystroke distance=%d", key.squareDistanceFormCenter((int) dataCollection.getLastKeystroke().getX(), (int) dataCollection.getLastKeystroke().getY()));
         Logger.d(TAG, "dc-- Keystroke primaryCode=%d", primaryCode);
         wordAction(primaryCode);
+
+        //dc-- start the listener after the first key press
+        if (sensorListner == null) {
+            sensorListner = new SensorListener((SensorManager) getSystemService(Context.SENSOR_SERVICE), 0);
+            sensorListner.start();
+        }
 
         int distance = (key.squareDistanceFormCenter((int) dataCollection.getLastKeystroke().getX(), (int) dataCollection.getLastKeystroke().getY()));
         dataCollection.getLastKeystroke().setDistance(distance);
@@ -1388,4 +1413,6 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
         mShiftKeyState.setActiveState(inputSaysCaps);
         handleShift();
     }
+
+
 }
