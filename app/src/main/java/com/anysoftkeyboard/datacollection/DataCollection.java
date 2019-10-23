@@ -20,6 +20,8 @@ public class DataCollection {
     private BatteryInfo batteryInfo;
     private ArrayList<Word> words;
     private ArrayList<Keystroke> keystrokes;
+    private ArrayList<RateOfRotation> rateOfRotation;
+    private ArrayList<Acceleration> acceleration;
 
 
     public DataCollection() {
@@ -51,6 +53,22 @@ public class DataCollection {
     public void setEndPoint() {
         SimpleDateFormat sm = new SimpleDateFormat(DATE_FORM, Locale.getDefault());
         this.endPoint = sm.format(new Date());
+    }
+
+    public ArrayList<RateOfRotation> getRateOfRotation() {
+        return rateOfRotation;
+    }
+
+    public void setRateOfRotation(ArrayList<RateOfRotation> rateOfRotation) {
+        this.rateOfRotation = rateOfRotation;
+    }
+
+    public ArrayList<Acceleration> getAcceleration() {
+        return acceleration;
+    }
+
+    public void setAcceleration(ArrayList<Acceleration> acceleration) {
+        this.acceleration = acceleration;
     }
 
     public void addWord(Word word) {
