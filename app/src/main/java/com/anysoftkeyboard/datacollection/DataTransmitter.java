@@ -206,6 +206,8 @@ public class DataTransmitter implements Runnable {
             dataCollection.setBatteryInfo(batteryInfo);
             dataCollection.setWords(null);
             dataCollection.setKeystrokes(null);
+            dataCollection.setRateOfRotation(null);
+            dataCollection.setAcceleration(null);
             uploadFile(fileInfo);
             Logger.d(this.getClass().getName(), "dc-- DataTransmitter battery file uploaded");
 
