@@ -164,7 +164,7 @@ public class DataTransmitter implements Runnable {
             Response response = client.newCall(request).execute();
 
         }catch (Exception e){
-
+            Logger.w(this.getClass().getName(), "dc-- DataTransmitter fail to upload m=%s", e.getMessage());
         }
 
     }
