@@ -12,7 +12,7 @@ import java.util.Locale;
  * yyyy-mm-dd HH:mm:ss
  */
 public class DataCollection {
-    private static final String DATE_FORM = "yyyy-mm-dd HH:mm:ss z";
+    private static final String DATE_FORM = "yyyy-MM-dd HH:mm:ss z";
 
     private String deviceId;
     private String startPoint;
