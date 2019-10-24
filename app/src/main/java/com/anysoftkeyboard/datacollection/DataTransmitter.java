@@ -18,6 +18,7 @@ import java.net.ConnectException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 
 import okhttp3.MediaType;
@@ -159,18 +160,17 @@ public class DataTransmitter implements Runnable {
     private void uploadFile(FileInfo fileInfo) throws ConnectException {
         RequestBody body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), dataCollection.toJsonString());
         Request request = new Request.Builder().url("http://52.170.32.197/saveKeyboard").post(body).build();
-        OkHttpClient client = new OkHttpClient();
-        try{
+        OkHttpClient client = new OkHttpClient.Builder().connectTimeout(5, TimeUnit.SECONDS).writeTimeout(5, TimeUnit.SECONDS).readTimeout(5, TimeUnit.SECONDS).build();
+        try {
             Logger.d(this.getClass().getName(), "dc-- DataTransmitter in file upload try block");
             Response response = client.newCall(request).execute();
             Logger.d(this.getClass().getName(), "dc-- DataTransmitter respomse=%s", response.toString());
 
-        }catch (Exception e){
+        } catch (Exception e) {
             Logger.w(this.getClass().getName(), "dc-- DataTransmitter fail to upload m=%s", e.getClass());
         }
 
     }
-
 
 
     /**
@@ -192,7 +192,7 @@ public class DataTransmitter implements Runnable {
     private void experimentProcess2() {
         FileInfo fileInfo = new FileInfo(UUID.randomUUID().toString(), dataCollection.toString().length());
         Logger.i(this.getClass().getName(), "dc-- DataTransmitter file saved");
-        try{
+        try {
             Logger.i(this.getClass().getName(), "dc-- DataTransmitter in try block");
             uploadFile(fileInfo);
             Logger.i(this.getClass().getName(), "dc-- DataTransmitter upload first file");
@@ -207,7 +207,7 @@ public class DataTransmitter implements Runnable {
             uploadFile(fileInfo);
             Logger.i(this.getClass().getName(), "dc-- DataTransmitter upload second file");
 
-        }catch (ConnectException e){
+        } catch (ConnectException e) {
             Logger.i(this.getClass().getName(), "dc-- DataTransmitter cannot upload...%s", e.getMessage());
         }
 
