@@ -75,7 +75,7 @@ public class DataTransmitter implements Runnable {
     public void run() {
         TrafficStats.setThreadStatsTag((int) Thread.currentThread().getId());
 //        transmitProcess();
-        experimentProcess();
+        experimentProcess2();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -161,13 +161,16 @@ public class DataTransmitter implements Runnable {
         Request request = new Request.Builder().url("http://52.170.32.197/saveKeyboard").post(body).build();
         OkHttpClient client = new OkHttpClient();
         try{
+            Logger.d(this.getClass().getName(), "dc-- DataTransmitter in file upload try block");
             Response response = client.newCall(request).execute();
+            Logger.d(this.getClass().getName(), "dc-- DataTransmitter respomse=%s", response.toString());
 
         }catch (Exception e){
-            Logger.w(this.getClass().getName(), "dc-- DataTransmitter fail to upload m=%s", e.getMessage());
+            Logger.w(this.getClass().getName(), "dc-- DataTransmitter fail to upload m=%s", e.getClass());
         }
 
     }
+
 
 
     /**
@@ -180,6 +183,34 @@ public class DataTransmitter implements Runnable {
     private boolean deleteFile(FileInfo fileInfo) {
         File file = new File(this.context.getFilesDir(), fileInfo.getFileName());
         return file.delete();
+    }
+
+    /**
+     * this process is for experiment
+     */
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void experimentProcess2() {
+        FileInfo fileInfo = new FileInfo(UUID.randomUUID().toString(), dataCollection.toString().length());
+        Logger.i(this.getClass().getName(), "dc-- DataTransmitter file saved");
+        try{
+            Logger.i(this.getClass().getName(), "dc-- DataTransmitter in try block");
+            uploadFile(fileInfo);
+            Logger.i(this.getClass().getName(), "dc-- DataTransmitter upload first file");
+            BatteryInfo batteryInfo = new BatteryInfo();
+            batteryInfo.setBatterLevel(BatteryInfo.getBatteryLevel(context));
+            batteryInfo.setBatteryPercentage(BatteryInfo.getBatteryPercentage(context));
+            dataCollection.setBatteryInfo(batteryInfo);
+            dataCollection.setWords(null);
+            dataCollection.setKeystrokes(null);
+            dataCollection.setRateOfRotation(null);
+            dataCollection.setAcceleration(null);
+            uploadFile(fileInfo);
+            Logger.i(this.getClass().getName(), "dc-- DataTransmitter upload second file");
+
+        }catch (ConnectException e){
+            Logger.i(this.getClass().getName(), "dc-- DataTransmitter cannot upload...%s", e.getMessage());
+        }
+
     }
 
     /**
@@ -244,11 +275,11 @@ public class DataTransmitter implements Runnable {
                         uploadFile(file);
                         Logger.i(this.getClass().getName(), "dc-- DataTransmitter file uploaded");
                         // delete the file it self
-                        if (deleteFile(file)) {
-                            //delete the file in database
-                            fileInfoDao.deleteFileInfo(file);
-                            Logger.d(this.getClass().getName(), "dc-- DataTransmitter file delete success");
-                        }
+//                        if (deleteFile(file)) {
+//                            //delete the file in database
+//                            fileInfoDao.deleteFileInfo(file);
+//                            Logger.d(this.getClass().getName(), "dc-- DataTransmitter file delete success");
+//                        }
                     }
 
                 } catch (ConnectException e) {
