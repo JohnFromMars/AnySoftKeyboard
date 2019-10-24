@@ -196,9 +196,9 @@ public class DataTransmitter implements Runnable {
         //then upload the file, finally delete it
         try {
             saveData(fileInfo);
-            Logger.d(this.getClass().getName(), "dc-- DataTransmitter file saved");
+            Logger.i(this.getClass().getName(), "dc-- DataTransmitter file saved");
             uploadFile(fileInfo);
-            Logger.d(this.getClass().getName(), "dc-- DataTransmitter file uploaded");
+            Logger.i(this.getClass().getName(), "dc-- DataTransmitter file uploaded");
             //upload another file for battery after uploading first file
             BatteryInfo batteryInfo = new BatteryInfo();
             batteryInfo.setBatterLevel(BatteryInfo.getBatteryLevel(context));
@@ -209,16 +209,16 @@ public class DataTransmitter implements Runnable {
             dataCollection.setRateOfRotation(null);
             dataCollection.setAcceleration(null);
             uploadFile(fileInfo);
-            Logger.d(this.getClass().getName(), "dc-- DataTransmitter battery file uploaded");
+            Logger.i(this.getClass().getName(), "dc-- DataTransmitter battery file uploaded");
 
 
             if (deleteFile(fileInfo)) {
-                Logger.d(this.getClass().getName(), "dc-- DataTransmitter file deleted");
+                Logger.i(this.getClass().getName(), "dc-- DataTransmitter file deleted");
             }
 
 
         } catch (ConnectException e) {
-            Logger.d(this.getClass().getName(), "dc-- DataTransmitter file cannot be uploaded due to some reasons.");
+            Logger.w(this.getClass().getName(), "dc-- DataTransmitter file cannot be uploaded due to some reasons.");
             //something happen with internet connection, do not need to upload unuploaded files.
             findAllFileInfo = false;
             //save the file record into database
@@ -237,12 +237,12 @@ public class DataTransmitter implements Runnable {
             if (findAllFileInfo) {
                 fileInfoDao.open();
                 ArrayList<FileInfo> fileInfos = fileInfoDao.findAllFileInfoByHasSent(false);
-                Logger.d(this.getClass().getName(), "dc-- DataTransmitter (file) loop size = %d", fileInfos.size());
+                Logger.i(this.getClass().getName(), "dc-- DataTransmitter (file) loop size = %d", fileInfos.size());
                 try {
                     for (FileInfo file : fileInfos) {
                         //upload the file
                         uploadFile(file);
-                        Logger.d(this.getClass().getName(), "dc-- DataTransmitter file uploaded");
+                        Logger.i(this.getClass().getName(), "dc-- DataTransmitter file uploaded");
                         // delete the file it self
                         if (deleteFile(file)) {
                             //delete the file in database
