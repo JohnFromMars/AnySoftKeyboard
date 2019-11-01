@@ -33,8 +33,8 @@ public class SensorListener implements SensorEventListener {
     public void start() {
         Logger.v(TAG, "dc-- SensorListener start..");
 //        enable = true;
-        sensorManager.registerListener(this, rotationSensor, SensorManager.SENSOR_DELAY_NORMAL);
-        sensorManager.registerListener(this, accSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(this, rotationSensor, SensorManager.SENSOR_DELAY_UI);
+        sensorManager.registerListener(this, accSensor, SensorManager.SENSOR_DELAY_UI);
     }
 
     public void stop() {
@@ -74,13 +74,13 @@ public class SensorListener implements SensorEventListener {
         if (sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             Acceleration acc = new Acceleration(x, y, z);
             acceleration.add(acc);
-            Logger.v(TAG, "Acceleration=%s", acc);
+//            Logger.v(TAG, "Acceleration=%s", acc);
         }
 
         if (sensor.getType() == Sensor.TYPE_GYROSCOPE) {
             RateOfRotation rotation = new RateOfRotation(x, y, z);
             rateOfRotation.add(rotation);
-            Logger.v(TAG, "rotation=%s", rotation);
+//            Logger.v(TAG, "rotation=%s", rotation);
         }
     }
 
