@@ -14,7 +14,7 @@ import com.anysoftkeyboard.datacollection.database.model.FileInfo;
 public class DataCollectionDatabaseHelper extends SQLiteOpenHelper {
 
     //Database information
-    private static final int DB_VERSION = 2;
+    private static final int DB_VERSION = 5;
     private static final String DB_NAME = "DATA_COLLECTION.DB";
 
     /**
