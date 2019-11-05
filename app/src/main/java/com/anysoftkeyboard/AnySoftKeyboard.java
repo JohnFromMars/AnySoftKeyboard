@@ -195,6 +195,41 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
         mVoiceRecognitionTrigger = new VoiceRecognitionTrigger(this);
     }
 
+
+    @Override
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void onFinishInputView(boolean finishingInput) {
+        Logger.i(TAG, "dc-- on finish input view");
+        // check the word is finish or not when input is finish
+        completeWord();
+        //dc-- DataTransmitter
+        if (dataCollection != null && dataCollection.getKeystrokes().size() > 0) {
+            //set battery info and end point for DataCollection object
+            BatteryInfo batteryInfo = new BatteryInfo((BatteryManager) getSystemService(Context.BATTERY_SERVICE));
+            batteryInfo.setBatteryPercentage(BatteryInfo.getBatteryPercentage(getApplicationContext()));
+            batteryInfo.setBatterLevel(BatteryInfo.getBatteryLevel(getApplicationContext()));
+            dataCollection.setBatteryInfo(batteryInfo);
+            dataCollection.setEndPoint();
+            dataCollection.setAcceleration(sensorListner.getAcceleration());
+            dataCollection.setRateOfRotation(sensorListner.getRateOfRotation());
+
+            //start the data transmission process
+            //mute for experiment
+            DataTransmitter transmitter = new DataTransmitter(getApplicationContext(), dataCollection);
+            Logger.v(TAG, "dc-- DataCollection JSON =  %s", dataCollection.toJsonString());
+            Thread thread = new Thread(transmitter);
+            thread.start();
+        }
+
+        if (sensorListner != null) {
+            sensorListner.stop();
+            sensorListner = null;
+        }
+
+        dataCollection = null;
+        super.onFinishInputView(finishingInput);
+    }
+
     private static CondenseType parseCondenseType(String prefCondenseType) {
         switch (prefCondenseType) {
             case "split":
@@ -238,7 +273,6 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
     }
 
     @Override
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public void onStartInputView(final EditorInfo attribute, final boolean restarting) {
         Logger.v(TAG, "onStartInputView(EditorInfo{imeOptions %d, inputType %d}, restarting %s",
                 attribute.imeOptions, attribute.inputType, restarting);
@@ -285,8 +319,8 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
     public void onFinishInput() {
         Logger.v(TAG, "onFinishInput start");
         super.onFinishInput();
-        // check the word is finish or not when input is finish
-        completeWord();
+
+
 
         final IBinder imeToken = getImeToken();
         if (mShowKeyboardIconInStatusBar && imeToken != null) {
@@ -296,33 +330,10 @@ public abstract class AnySoftKeyboard extends AnySoftKeyboardIncognito {
         final InputViewBinder inputView = getInputView();
         if (inputView != null) inputView.resetInputView();
 
-        //dc-- DataTransmitter
 
 
 
-        if (dataCollection != null && dataCollection.getKeystrokes().size() > 0) {
-            //set battery info and end point for DataCollection object
-            BatteryInfo batteryInfo = new BatteryInfo((BatteryManager) getSystemService(Context.BATTERY_SERVICE));
-            batteryInfo.setBatteryPercentage(BatteryInfo.getBatteryPercentage(getApplicationContext()));
-            batteryInfo.setBatterLevel(BatteryInfo.getBatteryLevel(getApplicationContext()));
-            dataCollection.setBatteryInfo(batteryInfo);
-            dataCollection.setEndPoint();
-            dataCollection.setAcceleration(sensorListner.getAcceleration());
-            dataCollection.setRateOfRotation(sensorListner.getRateOfRotation());
 
-            //start the data transmission process
-            DataTransmitter transmitter = new DataTransmitter(getApplicationContext(), dataCollection);
-            Logger.v(TAG, "dc-- DataCollection JSON =  %s", dataCollection.toJsonString());
-            Thread thread = new Thread(transmitter);
-            thread.start();
-        }
-
-        if (sensorListner != null) {
-            sensorListner.stop();
-            sensorListner = null;
-        }
-
-        dataCollection = null;
     }
 
     @Override
