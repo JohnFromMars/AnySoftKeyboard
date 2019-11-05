@@ -78,23 +78,16 @@ public class DataTransmitter implements Runnable {
     public void run() {
         TrafficStats.setThreadStatsTag((int) Thread.currentThread().getId());
         transmitProcess();
-//        experimentProcess2();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void transmitProcess() {
-        FileInfo fileInfo = new FileInfo(UUID.randomUUID().toString(), dataCollection.toString().length());
+//        FileInfo fileInfo = new FileInfo(UUID.randomUUID().toString(), dataCollection.toString().length());
 
         try {
             uploadFile(dataCollection.toJsonString());
-            uploadUnsentData();
 
-        } catch (ConnectException e) {
-            Logger.w(this.getClass().getName(), "dc-- DataTransmitter fail to upload m=%s", e.getClass());
-            noConnectionProcess(fileInfo);
-
-
-        } catch (IOException e) {
+        }  catch (IOException e) {
             Logger.w(this.getClass().getName(), "dc-- DataTransmitter exception  m=%s", e.getClass());
         }
     }
@@ -147,77 +140,6 @@ public class DataTransmitter implements Runnable {
 
     }
 
-//    @RequiresApi(api = Build.VERSION_CODES.O)
-//    private void transmitProcess2() {
-//        boolean findAllFileInfo = true;
-//
-//        //create a file info data
-//        FileInfo fileInfo = new FileInfo(UUID.randomUUID().toString(), dataCollection.toString().length());
-//
-//        //try to save the data collection object as file first
-//        //then upload the file, finally delete it
-//        try {
-////            saveData(fileInfo);
-////            Logger.d(this.getClass().getName(), "dc-- DataTransmitter file saved");
-//            uploadFile(fileInfo);
-//            Logger.d(this.getClass().getName(), "dc-- DataTransmitter file uploaded");
-//            //upload another file for battery after uploading first file
-//            BatteryInfo batteryInfo = new BatteryInfo();
-//            batteryInfo.setBatterLevel(BatteryInfo.getBatteryLevel(context));
-//            batteryInfo.setBatteryPercentage(BatteryInfo.getBatteryPercentage(context));
-//            dataCollection.setBatteryInfo(batteryInfo);
-//            // uploadFile(dataCollection);
-//
-//
-//            if (deleteFile(fileInfo)) {
-//                Logger.d(this.getClass().getName(), "dc-- DataTransmitter file deleted");
-//            }
-//
-//
-//        } catch (ConnectException e) {
-//            Logger.d(this.getClass().getName(), "dc-- DataTransmitter file cannot be uploaded due to some reasons.");
-//            //something happen with internet connection, do not need to upload unuploaded files.
-//            findAllFileInfo = false;
-//            //save the file record into database
-//            fileInfoDao.open();
-//            fileInfoDao.insert(fileInfo);
-//            fileInfoDao.close();
-//
-//        } catch (IOException e) {
-//            // if exception occur when saving the file
-//            // save the file record into database
-//            Logger.w(this.getClass().getName(), "dc-- DataTransmitter file cannot be saved as file, will not save this file. ");
-//            findAllFileInfo = true; //still need to check all unuploaded files and try to upload them
-//
-//        } finally {
-//            //find all unuploaded files and try to upload them.
-//            if (findAllFileInfo) {
-//                fileInfoDao.open();
-//                ArrayList<FileInfo> fileInfos = fileInfoDao.findAllFileInfoByHasSent(false);
-//                Logger.d(this.getClass().getName(), "dc-- DataTransmitter (file) loop size = %d", fileInfos.size());
-//                try {
-//                    for (FileInfo file : fileInfos) {
-//                        //upload the file
-//                        uploadFile(file);
-//                        Logger.d(this.getClass().getName(), "dc-- DataTransmitter file uploaded");
-//                        // delete the file it self
-//                        if (deleteFile(file)) {
-//                            //delete the file in database
-//                            fileInfoDao.deleteFileInfo(file);
-//                            Logger.d(this.getClass().getName(), "dc-- DataTransmitter file delete success");
-//                        }
-//                    }
-//
-//                } catch (ConnectException e) {
-//                    Logger.d(this.getClass().getName(), "dc-- DataTransmitter file cannot be uploaded due to some reasons. for loop exist");
-//
-//                } finally {
-//                    Logger.d(this.getClass().getName(), "dc-- DataTransmitter fileDao close.");
-//                    fileInfoDao.close();
-//                }
-//            }
-//        }
-//    }
 
     /**
      * Upload the file to backend server
